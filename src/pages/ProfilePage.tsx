@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { LogOut, UserCircle2 } from 'lucide-react';
+import { BookOpen, LogOut } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -8,6 +8,14 @@ export function ProfilePage() {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
+  const isDocente = user?.rol === 'docente';
+  const userInitials = user?.nombre
+    ?.split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '··';
+
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
@@ -15,48 +23,43 @@ export function ProfilePage() {
 
   return (
     <AppLayout crumbs={[{ label: 'Perfil' }]}>
+      <div className="uh-cover px-10 pb-10 pt-12 lg:px-12">
+        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
+          <div className={`uh-avatar xl ${isDocente ? '' : 'ink'}`}>{userInitials}</div>
+          <div className="min-w-0 flex-1">
+            <span className="uh-eyebrow">Perfil</span>
+            <h1 className="mt-2 font-serif text-[40px] font-medium leading-[1.04] tracking-[-0.022em] text-[var(--ink)]">
+              <NameWithAccent name={user?.nombre ?? 'Usuario'} />
+            </h1>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className={`uh-pill ${isDocente ? 'terra' : 'info'}`}>
+                <span className="dot" /> {isDocente ? 'Docente' : 'Estudiante'}
+              </span>
+              {user?.materia?.nombre && (
+                <span className="uh-pill">
+                  <BookOpen size={12} /> {user.materia.nombre}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="px-10 py-8 lg:px-12">
-        <div className="max-w-3xl rounded-[14px] border border-[var(--hairline)] bg-[var(--paper)] p-8 shadow-[0_1px_2px_rgba(31,29,26,0.03)]">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-[16px] border border-[var(--hairline)] bg-[var(--paper-2)] text-[34px] text-[var(--ink)]">
-              <UserCircle2 size={34} />
-            </div>
-            <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">Perfil</div>
-              <h1 className="mt-2 font-serif text-[34px] font-medium tracking-[-0.02em] text-[var(--ink)]">
-                {user?.nombre ?? 'Usuario'}
-              </h1>
-              <p className="mt-1 text-[14px] text-[var(--ink-3)]">Vista de solo lectura</p>
-            </div>
+        <div className="max-w-3xl">
+          <div className="grid gap-3 md:grid-cols-2">
+            <InfoCard label="Nombre" value={user?.nombre ?? '—'} />
+            <InfoCard label="Email" value={user?.email ?? '—'} />
+            <InfoCard label="Rol" value={user?.rol ?? '—'} />
+            <InfoCard label="Materia" value={user?.materia?.nombre ?? 'Sin materia asignada'} />
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Nombre</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.nombre ?? '—'}</div>
-            </div>
-            <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Email</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.email ?? '—'}</div>
-            </div>
-            <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Rol</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.rol ?? '—'}</div>
-            </div>
-            <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
-              <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Materia</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">
-                {user?.materia?.nombre ?? 'Sin materia asignada'}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-5">
-            <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Acerca de</div>
+          <div className="mt-6 rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-5">
+            <span className="uh-eyebrow">Acerca de</span>
             <div className="mt-3 grid gap-2 text-[14px] text-[var(--ink-2)]">
               <div><span className="font-medium text-[var(--ink)]">App:</span> UniAgent Hub</div>
               <div><span className="font-medium text-[var(--ink)]">Universidad:</span> USFX</div>
-              <div><span className="font-medium text-[var(--ink)]">Enfoque:</span> Agentes académicos y skills</div>
+              <div><span className="font-medium text-[var(--ink)]">Materia:</span> COM610 · Trabajando en la nube</div>
             </div>
           </div>
 
@@ -72,5 +75,29 @@ export function ProfilePage() {
         </div>
       </div>
     </AppLayout>
+  );
+}
+
+function InfoCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] p-4">
+      <span className="uh-eyebrow">{label}</span>
+      <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{value}</div>
+    </div>
+  );
+}
+
+function NameWithAccent({ name }: { name: string }) {
+  const parts = name.trim().split(' ');
+  if (parts.length <= 1) {
+    return <em className="italic text-[var(--accent)]">{name}</em>;
+  }
+  const head = parts.slice(0, -1).join(' ');
+  const tail = parts[parts.length - 1];
+  return (
+    <>
+      {head}{' '}
+      <em className="italic text-[var(--accent)]">{tail}</em>
+    </>
   );
 }
