@@ -112,34 +112,44 @@ function SkillEditorBody({
 
   return (
     <AppLayout crumbs={breadcrumbs} activeAgentId={agentId} activeSkillId={skillId}>
-      <div className="px-10 py-8 lg:px-12">
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div className="max-w-2xl flex-1">
-            {readOnly ? (
-              <h1 className="font-serif text-[38px] font-medium leading-tight tracking-[-0.02em] text-[var(--ink)]">
-                {nombre || 'Skill'}
-              </h1>
-            ) : (
-              <input
-                value={nombre}
-                onChange={(event) => setNombre(event.target.value)}
-                className="w-full bg-transparent font-serif text-[38px] font-medium leading-none tracking-[-0.02em] text-[var(--ink)] outline-none placeholder:text-[var(--ink-4)]"
-                placeholder="Título de la skill"
-              />
+      <div className="uh-cover px-10 pb-8 pt-10 lg:px-12">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex max-w-2xl flex-1 items-start gap-4">
+            {agent && (
+              <div className="grid h-12 w-12 flex-shrink-0 place-items-center rounded-[10px] border border-[var(--hairline)] bg-[var(--paper)] text-[24px] shadow-[0_4px_12px_-6px_rgba(31,29,26,0.18)]">
+                {agent.icono}
+              </div>
             )}
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-[var(--ink-3)]">
+            <div className="min-w-0 flex-1">
+              <span className="uh-eyebrow">
+                Skill{agent ? ` · ${agent.nombre}` : ''}
+              </span>
               {readOnly ? (
-                updatedAt && (
-                  <span>Actualizado el {new Date(updatedAt).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' })}</span>
-                )
+                <h1 className="mt-1 font-serif text-[40px] font-medium leading-[1.05] tracking-[-0.022em] text-[var(--ink)]">
+                  <span className="italic text-[var(--accent)]">{nombre || 'Skill'}</span>
+                </h1>
               ) : (
-                <>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">{saveLabel}</span>
-                  {updatedAt && (
-                    <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
-                  )}
-                </>
+                <input
+                  value={nombre}
+                  onChange={(event) => setNombre(event.target.value)}
+                  className="mt-1 w-full bg-transparent font-serif text-[40px] font-medium leading-[1.05] tracking-[-0.022em] text-[var(--ink)] outline-none placeholder:text-[var(--ink-4)]"
+                  placeholder="Título de la skill"
+                />
               )}
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-[var(--ink-3)]">
+                {readOnly ? (
+                  updatedAt && (
+                    <span>Actualizado el {new Date(updatedAt).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' })}</span>
+                  )
+                ) : (
+                  <>
+                    <span className="uh-pill">{saveLabel}</span>
+                    {updatedAt && (
+                      <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
@@ -173,7 +183,9 @@ function SkillEditorBody({
             )}
           </div>
         </div>
+      </div>
 
+      <div className="px-10 py-8 lg:px-12">
         {(status === AutoSaveStatus.Error || errorMessage || autoSaveError) && !readOnly && (
           <div className="mb-4 flex items-center gap-2 rounded-[10px] border border-[var(--bad-wash)] bg-[var(--bad-wash)] px-4 py-3 text-[13px] text-[var(--bad)]">
             <AlertTriangle size={14} />
