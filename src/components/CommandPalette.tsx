@@ -23,7 +23,7 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const commands = useMemo<CommandItem[]>(() => [
-    { id: 'dashboard', label: 'Ir a Dashboard', action: () => navigate('/') },
+    { id: 'dashboard', label: 'Ir a Dashboard', action: () => navigate('/dashboard') },
     { id: 'profile', label: 'Ver perfil', action: () => navigate('/profile') },
     { id: 'logout', label: 'Cerrar sesión', action: () => { logout(); navigate('/login', { replace: true }); } },
   ], [logout, navigate]);

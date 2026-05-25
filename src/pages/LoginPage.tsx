@@ -38,7 +38,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (authUser && authToken) {
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [authToken, authUser, navigate]);
 
@@ -46,7 +46,7 @@ export function LoginPage() {
     try {
       const response = await login(values);
       authLogin(response.user, response.token);
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo iniciar sesión';
       setError('root', { message });

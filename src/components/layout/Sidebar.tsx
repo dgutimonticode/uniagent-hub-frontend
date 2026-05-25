@@ -217,7 +217,7 @@ export function Sidebar({
       <div className="px-2 mb-1">
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className="flex items-center gap-2 w-full px-2 py-1.5 text-[13.5px] text-[var(--ink-2)] rounded-md transition-colors hover:bg-[var(--bg-hover)]"
         >
           <Home size={13} />

@@ -12,7 +12,7 @@ export function NotFoundPage() {
           Puede que el enlace esté roto o que la ruta ya no exista.
         </p>
         <Link
-          to="/"
+          to="/dashboard"
           className="mt-6 inline-flex items-center justify-center rounded-[6px] border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 text-[13px] text-[var(--paper)] transition-colors hover:bg-black"
         >
           Volver al Dashboard

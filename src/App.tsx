@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { LoginPage } from './pages/LoginPage'
+import { WelcomePage } from './pages/WelcomePage'
 import { DashboardPage } from './pages/DashboardPage'
 import { AgentDetailPage } from './pages/AgentDetailPage'
 import { SkillEditorPage } from './pages/SkillEditorPage'
@@ -16,9 +17,10 @@ function App() {
       <CommandPalette />
       <GlobalAgentEditor />
       <Routes>
+        <Route path="/" element={<WelcomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />
