@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BookOpen, Plus } from 'lucide-react';
+import { ArrowRight, BookOpen, FileText, Plus } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuthStore } from '@/stores/authStore';
 import { useAgent } from '@/hooks/useAgents';
 import { useSkills, useCreateSkill } from '@/hooks/useSkills';
+import { Skill } from '@/types';
 
 export function AgentDetailPage() {
   const { id } = useParams();
@@ -66,100 +67,132 @@ export function AgentDetailPage() {
 
   return (
     <AppLayout crumbs={breadcrumbs} activeAgentId={agentId}>
-      <div className="grid min-h-0 grid-cols-1 lg:grid-cols-[320px_1fr]">
-        <aside className="border-r border-[var(--hairline)] bg-[var(--paper-2)] px-5 py-6">
-          <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] p-5">
-            <div className="flex items-start gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-[14px] border border-[var(--hairline)] bg-[var(--paper-2)] text-[34px] shadow-[0_1px_2px_rgba(31,29,26,0.03)]">
-                {agent.icono}
+      <div className="px-10 py-8 lg:px-12">
+        <header className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-5">
+            <div className="grid h-20 w-20 flex-shrink-0 place-items-center rounded-[16px] border border-[var(--hairline)] bg-[var(--paper-2)] text-[40px] shadow-[0_1px_2px_rgba(31,29,26,0.03)]">
+              {agent.icono}
+            </div>
+            <div className="min-w-0">
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
+                Agente · {agent.docente.nombre}
+              </div>
+              <h1 className="mt-2 font-serif text-[40px] font-medium leading-tight tracking-[-0.02em] text-[var(--ink)]">
+                {agent.nombre}
+              </h1>
+              {agent.descripcion && (
+                <p className="mt-2 max-w-2xl font-serif text-[16px] italic leading-7 text-[var(--ink-2)]">
+                  {agent.descripcion}
+                </p>
+              )}
+              <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-[var(--ink-3)]">
+                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
+                  <BookOpen size={12} /> {agent.materia.nombre}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
+                  {skills.length} skills
+                </span>
               </div>
             </div>
+          </div>
 
-            <h1 className="mt-4 font-serif text-[34px] font-medium leading-tight tracking-[-0.02em] text-[var(--ink)]">
-              {agent.nombre}
-            </h1>
-            {agent.descripcion && (
-              <p className="mt-2 font-serif text-[15px] italic leading-7 text-[var(--ink-2)]">
-                {agent.descripcion}
-              </p>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={() => void handleCreateSkill()}
+              disabled={creating}
+              className="inline-flex items-center gap-2 self-start rounded-[6px] border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 text-[13px] font-medium text-[var(--paper)] transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Plus size={14} /> {creating ? 'Creando…' : 'Nueva skill'}
+            </button>
+          )}
+        </header>
+
+        <section>
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <h2 className="font-serif text-[22px] font-medium tracking-[-0.015em] text-[var(--ink)]">
+              Skills
+            </h2>
+            {!skillsLoading && skills.length > 0 && (
+              <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-[var(--ink-3)]">
+                {skills.length} {skills.length === 1 ? 'skill' : 'skills'}
+              </span>
             )}
+          </div>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-[var(--ink-3)]">
-              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
-                <BookOpen size={12} /> {agent.materia.nombre}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
-                {skills.length} skills
-              </span>
+          {skillsLoading ? (
+            <div className="rounded-[10px] border border-[var(--hairline)] bg-[var(--paper)] p-8 text-center text-[13px] text-[var(--ink-3)]">
+              Cargando skills…
             </div>
-
-            {!readOnly && (
-              <div className="mt-5 flex items-center justify-between rounded-[10px] border border-[var(--hairline)] bg-[var(--paper-2)] px-4 py-3">
-                <div>
-                  <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Nueva skill</div>
-                  <div className="mt-1 text-[13px] text-[var(--ink-2)]">Crear un borrador vacío y empezar a escribir.</div>
-                </div>
+          ) : skills.length === 0 ? (
+            <div className="rounded-[10px] border border-dashed border-[var(--hairline-2)] bg-[var(--paper)] p-10 text-center">
+              <FileText size={20} className="mx-auto text-[var(--ink-3)]" />
+              <div className="mt-3 font-serif text-[18px] text-[var(--ink)]">
+                Este agente todavía no tiene skills.
+              </div>
+              {readOnly ? (
+                <p className="mt-2 text-[13px] text-[var(--ink-3)]">
+                  Cuando tu docente publique alguna, va a aparecer acá.
+                </p>
+              ) : (
                 <button
                   type="button"
                   onClick={() => void handleCreateSkill()}
                   disabled={creating}
-                  className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--ink)] bg-[var(--ink)] px-3 py-2 text-[13px] text-[var(--paper)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-4 inline-flex items-center gap-2 rounded-[6px] border border-[var(--ink)] bg-[var(--ink)] px-4 py-2 text-[13px] text-[var(--paper)] transition-colors hover:bg-black disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Plus size={14} /> {creating ? 'Creando…' : 'Nueva skill'}
+                  <Plus size={14} /> {creating ? 'Creando…' : 'Crear primera skill'}
                 </button>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] p-3">
-            <div className="px-2 pb-2 font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Skills</div>
-            {skillsLoading ? (
-              <div className="px-3 py-4 text-[13px] text-[var(--ink-3)]">Cargando…</div>
-            ) : skills.length === 0 ? (
-              <div className="px-3 py-4 text-[13px] text-[var(--ink-3)]">
-                Este agente todavía no tiene skills.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                {skills.map((skill, index) => (
-                  <button
-                    key={skill.id}
-                    type="button"
-                    onClick={() => navigate(`/agent/${agentId}/skill/${skill.id}`)}
-                    className="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-[13px] text-[var(--ink-2)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--ink)]"
-                  >
-                    <span className="font-mono text-[10px] text-[var(--ink-4)]">{String(index + 1).padStart(2, '0')}</span>
-                    <span className="min-w-0 flex-1 truncate font-serif text-[14px]">{skill.nombre}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--ink-3)]">{skill.tamano_kb}kb</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </aside>
-
-        <main className="px-6 py-6 lg:px-10">
-          <div className="max-w-3xl">
-            <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] p-6">
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">Resumen del agente</div>
-              <div className="mt-3 grid gap-3 text-[14px] text-[var(--ink-2)]">
-                <div>
-                  <span className="font-medium text-[var(--ink)]">Icono:</span> {agent.icono}
-                </div>
-                <div>
-                  <span className="font-medium text-[var(--ink)]">Materia:</span> {agent.materia.nombre}
-                </div>
-                <div>
-                  <span className="font-medium text-[var(--ink)]">Docente:</span> {agent.docente.nombre}
-                </div>
-                <div>
-                  <span className="font-medium text-[var(--ink)]">Estado:</span> {readOnly ? 'Vista estudiante' : 'Vista docente'}
-                </div>
-              </div>
+              )}
             </div>
-          </div>
-        </main>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {skills.map((skill, index) => (
+                <SkillCard
+                  key={skill.id}
+                  index={index}
+                  skill={skill}
+                  onClick={() => navigate(`/agent/${agentId}/skill/${skill.id}`)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </AppLayout>
+  );
+}
+
+interface SkillCardProps {
+  index: number;
+  skill: Skill;
+  onClick: () => void;
+}
+
+function SkillCard({ index, skill, onClick }: SkillCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex min-h-[148px] flex-col rounded-[10px] border border-[var(--hairline)] bg-[var(--paper)] p-4 text-left transition-all hover:-translate-y-px hover:border-[var(--ink-3)] hover:shadow-[0_8px_20px_-10px_rgba(31,29,26,0.12)]"
+    >
+      <div className="flex items-start justify-between">
+        <span className="font-mono text-[10.5px] tracking-[0.08em] text-[var(--ink-4)]">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+        <ArrowRight size={14} className="text-[var(--ink-3)] transition-colors group-hover:text-[var(--ink)]" />
+      </div>
+      <div className="mt-3 font-serif text-[17px] font-medium leading-tight tracking-[-0.012em] text-[var(--ink)]">
+        {skill.nombre}
+      </div>
+      {skill.descripcion && (
+        <p className="mt-1 text-[13px] text-[var(--ink-3)] line-clamp-2">{skill.descripcion}</p>
+      )}
+      <div className="mt-auto pt-4 flex items-center gap-2 font-mono text-[11px] tracking-[0.04em] text-[var(--ink-3)]">
+        <span>{skill.tamano_kb} kb</span>
+        <span>·</span>
+        <span>Actualizada {new Date(skill.updated_at).toLocaleDateString([], { day: '2-digit', month: 'short' })}</span>
+      </div>
+    </button>
   );
 }
