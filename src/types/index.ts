@@ -1,96 +1,94 @@
 // UniAgent Hub - Shared Types
-// Based on 04_api_specification.md
+// Aligned to the real backend contract (Spanish field names).
+// Source of truth: uniagent-hub-backend/app/schemas/*.py + app/models/*.py
+
+export type Rol = 'docente' | 'estudiante';
+
+export interface MateriaBrief {
+  id: number;
+  nombre: string;
+  icono?: string | null;
+}
+
+export interface Materia extends MateriaBrief {
+  carrera?: string | null;
+  semestre?: number | null;
+  created_at?: string | null;
+}
+
+export interface DocenteBrief {
+  id: number;
+  nombre: string;
+}
 
 export interface User {
   id: number;
+  nombre: string;
   email: string;
-  name: string;
-  role: 'docente' | 'estudiante';
-  institution: string;
-  created_at: string;
-  updated_at: string;
+  rol: Rol;
+  materia: Materia | null;
+  avatar_url: string | null;
+  created_at: string | null;
+  last_login_at: string | null;
 }
 
 export interface Agente {
   id: number;
-  user_id: number;
-  emoji: string;
-  name: string;
-  description: string | null;
-  materia_id: number | null;
-  color: string;
-  version: number;
-  students_count: number;
-  skills_done: number;
-  skills_total: number;
+  nombre: string;
+  descripcion: string | null;
+  icono: string;
+  s3_prefix: string;
+  materia: MateriaBrief;
+  docente: DocenteBrief;
+  skills_count: number;
   created_at: string;
   updated_at: string;
-  skills: Skill[];
 }
 
 export interface Skill {
   id: number;
-  agent_id: number;
-  name: string;
-  description: string | null;
-  content: string;
-  status: 'draft' | 'published';
-  order_index: number;
-  estimated_minutes: number | null;
+  agente_id: number;
+  nombre: string;
+  descripcion: string | null;
+  s3_key: string;
+  tamano_kb: number;
+  orden: number;
   created_at: string;
   updated_at: string;
 }
 
-export interface Materia {
-  id: number;
-  nombre: string;
-  codigo: string;
-  facultad: string;
+export interface SkillDetail extends Skill {
+  contenido: string;
 }
 
 export interface CreateAgentInput {
-  emoji: string;
-  name: string;
-  description?: string;
-  materia_id?: number;
-  color: string;
+  nombre: string;
+  descripcion?: string;
+  icono?: string;
+  materia_id: number;
 }
 
 export interface UpdateAgentInput {
-  emoji?: string;
-  name?: string;
-  description?: string;
-  materia_id?: number;
-  color?: string;
+  nombre?: string;
+  descripcion?: string;
+  icono?: string;
 }
 
 export interface CreateSkillInput {
-  agent_id: number;
-  name: string;
-  description?: string;
-  content: string;
-  estimated_minutes?: number;
+  nombre: string;
+  descripcion?: string;
+  contenido?: string;
 }
 
 export interface UpdateSkillInput {
-  name?: string;
-  description?: string;
-  content?: string;
-  status?: 'draft' | 'published';
-  estimated_minutes?: number;
+  nombre?: string;
+  descripcion?: string;
+  contenido?: string;
 }
 
 export interface LoginInput {
   email: string;
   password: string;
-}
-
-export interface RegisterInput {
-  email: string;
-  password: string;
-  name: string;
-  role: 'docente' | 'estudiante';
-  institution: string;
 }
 
 export interface ApiResponse<T> {
@@ -102,23 +100,8 @@ export interface ApiResponse<T> {
   };
 }
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: string;
-  sources?: Source[];
-}
-
-export interface Source {
-  id: string;
-  title: string;
-  content: string;
-  relevance_score: number;
-}
-
-export interface ChatChunk {
-  type: 'content' | 'source' | 'done';
-  content?: string;
-  source?: Source;
+export interface SkillDownload {
+  url: string;
+  expires_in: number;
+  filename: string;
 }

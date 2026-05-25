@@ -1,18 +1,23 @@
-import { useMutation } from '@tanstack/react-query';
-import { saveMockSkill } from '@/lib/mock-asl23';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateSkill } from '@/api/skills.api';
+import { Skill } from '@/types';
 
 interface SaveSkillPayload {
+  agenteId: number;
   skillId: number;
-  title: string;
-  content: string;
+  nombre: string;
+  contenido: string;
 }
 
 export function useSkillSave() {
-  return useMutation({
-    mutationFn: async ({ skillId, title, content }: SaveSkillPayload) => {
-      // TODO: conectar cuando ASL-14 esté listo.
-      // await apiClient.put(`/skills/${skillId}`, { title, content });
-      return saveMockSkill(skillId, { title, content });
+  const queryClient = useQueryClient();
+
+  return useMutation<Skill, Error, SaveSkillPayload>({
+    mutationFn: ({ agenteId, skillId, nombre, contenido }) =>
+      updateSkill(agenteId, skillId, { nombre, contenido }),
+    onSuccess: (_data, { agenteId, skillId }) => {
+      queryClient.invalidateQueries({ queryKey: ['skill', agenteId, skillId] });
+      queryClient.invalidateQueries({ queryKey: ['skills', agenteId] });
     },
   });
 }

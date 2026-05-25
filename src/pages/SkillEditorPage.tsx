@@ -1,24 +1,26 @@
-import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { AlertTriangle, RotateCcw } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AlertTriangle, Download, RotateCcw, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { NotionEditor } from '@/components/editor/NotionEditor';
 import { useAuthStore } from '@/stores/authStore';
 import { AutoSaveStatus, useAutoSave } from '@/hooks/useAutoSave';
-import { getMockAgentById, getMockMateriaName, getMockSkill } from '@/lib/mock-asl23';
+import { useAgent } from '@/hooks/useAgents';
+import { useSkill, useDeleteSkill } from '@/hooks/useSkills';
 import { useSkillSave } from '@/hooks/useSkillSave';
+import { getSkillDownloadUrl } from '@/api/skills.api';
 
 interface SkillDraft {
-  title: string;
-  content: string;
+  nombre: string;
+  contenido: string;
 }
 
 interface SkillEditorBodyProps {
   skillId: number;
   agentId: number;
-  initialTitle: string;
-  initialContent: string;
+  initialNombre: string;
+  initialContenido: string;
   initialUpdatedAt: string;
   readOnly: boolean;
 }
@@ -26,22 +28,32 @@ interface SkillEditorBodyProps {
 function SkillEditorBody({
   skillId,
   agentId,
-  initialTitle,
-  initialContent,
+  initialNombre,
+  initialContenido,
   initialUpdatedAt,
   readOnly,
 }: SkillEditorBodyProps) {
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
+  const navigate = useNavigate();
+  const [nombre, setNombre] = useState(initialNombre);
+  const [contenido, setContenido] = useState(initialContenido);
   const [updatedAt, setUpdatedAt] = useState<string>(initialUpdatedAt);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const saveSkill = useSkillSave();
+  const deleteSkill = useDeleteSkill(agentId);
+  const { data: agent } = useAgent(agentId);
 
-  const persistSkill = useMemo(
-    () => async (draft: SkillDraft) => {
+  const persistSkill = useCallback(
+    async (draft: SkillDraft) => {
       try {
-        const saved = await saveSkill.mutateAsync({ skillId, title: draft.title, content: draft.content });
-        setUpdatedAt(saved.updatedAt);
+        const saved = await saveSkill.mutateAsync({
+          agenteId: agentId,
+          skillId,
+          nombre: draft.nombre,
+          contenido: draft.contenido,
+        });
+        setUpdatedAt(saved.updated_at);
         setErrorMessage(null);
       } catch (saveError) {
         const message = saveError instanceof Error ? saveError.message : 'No se pudo guardar';
@@ -49,10 +61,15 @@ function SkillEditorBody({
         throw saveError;
       }
     },
-    [saveSkill, skillId]
+    [agentId, saveSkill, skillId]
   );
 
-  const { status, error: autoSaveError, retry } = useAutoSave<SkillDraft>({ title, content }, persistSkill, 1500, !readOnly);
+  const { status, error: autoSaveError, retry } = useAutoSave<SkillDraft>(
+    { nombre, contenido },
+    persistSkill,
+    1500,
+    !readOnly
+  );
 
   const saveLabel = useMemo(() => {
     if (status === AutoSaveStatus.Saving) return 'Guardando...';
@@ -65,21 +82,42 @@ function SkillEditorBody({
 
   const breadcrumbs = useMemo(
     () => [
-      { label: getMockMateriaName(getMockAgentById(agentId)?.materiaId) },
-      { label: getMockAgentById(agentId)?.name ?? `Agente ${agentId}` },
-      { label: title || 'Skill' },
+      { label: agent?.materia?.nombre ?? 'Sin materia' },
+      { label: agent?.nombre ?? `Agente ${agentId}` },
+      { label: nombre || 'Skill' },
     ],
-    [agentId, title]
+    [agent?.materia?.nombre, agent?.nombre, agentId, nombre]
   );
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const payload = await getSkillDownloadUrl(agentId, skillId);
+      window.open(payload.url, '_blank', 'noopener,noreferrer');
+    } catch {
+      toast.error('No se pudo generar el enlace de descarga.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteSkill.mutateAsync(skillId);
+      navigate(`/agent/${agentId}`);
+    } catch {
+      // toast lo maneja el hook
+    }
+  };
 
   return (
     <AppLayout crumbs={breadcrumbs} activeAgentId={agentId} activeSkillId={skillId}>
       <div className="px-10 py-8 lg:px-12">
         <div className="mb-5 flex items-start justify-between gap-4">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl flex-1">
             <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
+              value={nombre}
+              onChange={(event) => setNombre(event.target.value)}
               readOnly={readOnly}
               className="w-full bg-transparent font-serif text-[38px] font-medium leading-none tracking-[-0.02em] text-[var(--ink)] outline-none placeholder:text-[var(--ink-4)]"
               placeholder="Título de la skill"
@@ -90,19 +128,41 @@ function SkillEditorBody({
               ) : (
                 <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">{saveLabel}</span>
               )}
-              {updatedAt && !readOnly && <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>}
+              {updatedAt && !readOnly && (
+                <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+              )}
             </div>
           </div>
 
-          {!readOnly && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={retry}
-              className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2 text-[13px] text-[var(--ink-2)] transition-colors hover:border-[var(--ink-3)] hover:text-[var(--ink)]"
+              onClick={() => void handleDownload()}
+              disabled={downloading}
+              className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2 text-[13px] text-[var(--ink-2)] transition-colors hover:border-[var(--ink-3)] hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RotateCcw size={14} /> Reintentar
+              <Download size={14} /> {downloading ? 'Generando…' : 'Descargar'}
             </button>
-          )}
+
+            {!readOnly && (
+              <>
+                <button
+                  type="button"
+                  onClick={retry}
+                  className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2 text-[13px] text-[var(--ink-2)] transition-colors hover:border-[var(--ink-3)] hover:text-[var(--ink)]"
+                >
+                  <RotateCcw size={14} /> Reintentar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(true)}
+                  className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--bad)] bg-transparent px-3 py-2 text-[13px] text-[var(--bad)] transition-colors hover:bg-[var(--bad-wash)]"
+                >
+                  <Trash2 size={14} /> Eliminar
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {(status === AutoSaveStatus.Error || errorMessage || autoSaveError) && !readOnly && (
@@ -113,15 +173,50 @@ function SkillEditorBody({
         )}
 
         <div className="max-w-4xl">
-          <NotionEditor content={content} onChange={setContent} readOnly={readOnly} />
+          <NotionEditor content={contenido} onChange={setContenido} readOnly={readOnly} />
         </div>
-
-        {!readOnly && (
-          <div className="mt-4 max-w-4xl rounded-[10px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4 text-[13px] text-[var(--ink-3)]">
-            TODO: conectar cuando ASL-14 esté listo. Los endpoints reales de skills todavía no están activos en backend.
-          </div>
-        )}
       </div>
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(31,29,26,0.28)] p-4">
+          <button
+            type="button"
+            aria-label="Cerrar"
+            className="absolute inset-0 cursor-default"
+            onClick={() => setConfirmDelete(false)}
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="relative w-full max-w-md overflow-hidden rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] shadow-[0_24px_70px_rgba(31,29,26,0.24)]"
+          >
+            <div className="border-b border-[var(--hairline)] bg-[var(--paper-2)] px-5 py-4">
+              <h3 className="font-serif text-[20px] font-medium tracking-[-0.015em] text-[var(--ink)]">Eliminar skill</h3>
+              <p className="mt-1 text-[13px] leading-6 text-[var(--ink-3)]">
+                Esta acción borra <strong className="font-medium">{nombre || 'la skill'}</strong> y su contenido en S3. No se puede deshacer.
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-5 py-4">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-[6px] border border-[var(--hairline-2)] bg-[var(--paper)] px-4 py-2 text-[13px] text-[var(--ink-2)] transition-colors hover:border-[var(--ink-3)] hover:text-[var(--ink)]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDelete()}
+                disabled={deleteSkill.isPending}
+                className="inline-flex items-center gap-2 rounded-[6px] border border-[var(--bad)] bg-[var(--bad)] px-4 py-2 text-[13px] text-[var(--paper)] transition-colors hover:bg-[#8f3e31] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <Trash2 size={14} />
+                {deleteSkill.isPending ? 'Eliminando…' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
@@ -131,22 +226,18 @@ export function SkillEditorPage() {
   const user = useAuthStore((state) => state.user);
   const parsedSkillId = Number(skillId);
   const parsedAgentId = Number(agentId);
-  const readOnly = user?.role === 'estudiante';
+  const readOnly = user?.rol === 'estudiante';
 
-  const { data: skill, isLoading, error } = useQuery({
-    queryKey: ['skill-mock', parsedSkillId],
-    queryFn: () => getMockSkill(parsedSkillId),
-    enabled: !!parsedSkillId,
-  });
+  const { data: skill, isLoading, error } = useSkill(parsedAgentId, parsedSkillId);
+  const { data: agent } = useAgent(parsedAgentId);
 
-  const agent = getMockAgentById(parsedAgentId);
   const breadcrumbs = useMemo(
     () => [
-      { label: getMockMateriaName(agent?.materiaId) },
-      { label: agent?.name ?? `Agente ${parsedAgentId}` },
-      { label: skill?.title ?? 'Skill' },
+      { label: agent?.materia?.nombre ?? 'Sin materia' },
+      { label: agent?.nombre ?? `Agente ${parsedAgentId}` },
+      { label: skill?.nombre ?? 'Skill' },
     ],
-    [agent?.materiaId, agent?.name, parsedAgentId, skill?.title]
+    [agent?.materia?.nombre, agent?.nombre, parsedAgentId, skill?.nombre]
   );
 
   if (isLoading) {
@@ -174,9 +265,9 @@ export function SkillEditorPage() {
       key={skill.id}
       skillId={skill.id}
       agentId={parsedAgentId}
-      initialTitle={skill.title}
-      initialContent={skill.content}
-      initialUpdatedAt={skill.updatedAt}
+      initialNombre={skill.nombre}
+      initialContenido={skill.contenido ?? ''}
+      initialUpdatedAt={skill.updated_at}
       readOnly={readOnly}
     />
   );

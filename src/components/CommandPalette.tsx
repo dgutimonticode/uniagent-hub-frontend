@@ -24,14 +24,14 @@ export function CommandPalette() {
 
   const commands = useMemo<CommandItem[]>(() => [
     { id: 'dashboard', label: 'Ir a Dashboard', action: () => navigate('/') },
-    { id: 'new-skill', label: 'Nueva skill', action: () => navigate('/') },
+    { id: 'profile', label: 'Ver perfil', action: () => navigate('/profile') },
     { id: 'logout', label: 'Cerrar sesión', action: () => { logout(); navigate('/login', { replace: true }); } },
   ], [logout, navigate]);
 
   const filteredAgents = useMemo(() => {
     if (!query.trim()) return agents;
     const search = query.toLowerCase();
-    return agents.filter((agent) => agent.name.toLowerCase().includes(search));
+    return agents.filter((agent) => agent.nombre.toLowerCase().includes(search));
   }, [agents, query]);
 
   const filteredCommands = useMemo(() => {
@@ -49,8 +49,8 @@ export function CommandPalette() {
     })),
     ...filteredAgents.map((agent) => ({
       id: `agent-${agent.id}`,
-      label: agent.name,
-      description: agent.description ?? 'Abrir agente',
+      label: agent.nombre,
+      description: agent.descripcion ?? 'Abrir agente',
       action: () => navigate(`/agent/${agent.id}`),
     })),
   ], [filteredAgents, filteredCommands, navigate]);

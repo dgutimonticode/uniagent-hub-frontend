@@ -1,5 +1,5 @@
 // UniAgent Hub - API Client
-// Axios instance with interceptors for auth and error handling
+// Axios instance with interceptors for auth and error handling.
 
 import axios, { AxiosError } from 'axios';
 import { ApiResponse } from '@/types';
@@ -13,7 +13,6 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor: adds JWT token if available
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('uniagent_token');
   if (token) {
@@ -22,14 +21,18 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Response interceptor: handles 401 errors
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<ApiResponse<never>>) => {
     if (error.response?.status === 401) {
-      // Clear token and redirect to login
+      // Wipe BOTH the raw token and the Zustand persisted store, otherwise the
+      // login page rehydrates the stale user and bounces back to /, creating a
+      // redirect loop that hammers the backend with 401s.
       localStorage.removeItem('uniagent_token');
-      window.location.href = '/login';
+      localStorage.removeItem('uniagent-auth');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

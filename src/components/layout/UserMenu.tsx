@@ -7,8 +7,8 @@ export function UserMenu() {
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
-  const userInitials = user?.name
-    .split(' ')
+  const userInitials = user?.nombre
+    ?.split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase()
@@ -21,9 +21,9 @@ export function UserMenu() {
           {userInitials}
         </div>
         <div className="hidden sm:flex flex-col leading-tight min-w-0">
-          <div className="text-[13px] font-medium text-[var(--ink)] truncate">{user?.name}</div>
+          <div className="text-[13px] font-medium text-[var(--ink)] truncate">{user?.nombre}</div>
           <div className="font-mono text-[10px] text-[var(--ink-3)] uppercase tracking-[0.08em]">
-            {user?.role === 'docente' ? 'Docente' : 'Estudiante'}
+            {user?.rol === 'docente' ? 'Docente' : 'Estudiante'}
           </div>
         </div>
       </summary>

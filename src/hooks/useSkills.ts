@@ -1,6 +1,12 @@
 // UniAgent Hub - Skills Hooks
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listSkills, getSkill, createSkill, updateSkill, deleteSkill } from '@/api/skills.api';
+import {
+  listSkills,
+  getSkill,
+  createSkill,
+  updateSkill,
+  deleteSkill,
+} from '@/api/skills.api';
 import { ApiResponse, CreateSkillInput, UpdateSkillInput } from '@/types';
 import { toast } from 'sonner';
 
@@ -10,30 +16,31 @@ interface ApiErrorResponse {
   };
 }
 
-export function useSkills(agentId: number) {
+export function useSkills(agenteId: number) {
   return useQuery({
-    queryKey: ['skills', agentId],
-    queryFn: () => listSkills(agentId),
-    enabled: !!agentId,
+    queryKey: ['skills', agenteId],
+    queryFn: () => listSkills(agenteId),
+    enabled: !!agenteId,
   });
 }
 
-export function useSkill(id: number) {
+export function useSkill(agenteId: number, id: number) {
   return useQuery({
-    queryKey: ['skill', id],
-    queryFn: () => getSkill(id),
-    enabled: !!id,
+    queryKey: ['skill', agenteId, id],
+    queryFn: () => getSkill(agenteId, id),
+    enabled: !!agenteId && !!id,
   });
 }
 
-export function useCreateSkill() {
+export function useCreateSkill(agenteId: number) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: CreateSkillInput) => createSkill(data),
-    onSuccess: (_, { agent_id }) => {
-      queryClient.invalidateQueries({ queryKey: ['skills', agent_id] });
-      queryClient.invalidateQueries({ queryKey: ['agents'] });
+    mutationFn: (data: CreateSkillInput) => createSkill(agenteId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['skills', agenteId] });
+      queryClient.invalidateQueries({ queryKey: ['agente', agenteId] });
+      queryClient.invalidateQueries({ queryKey: ['agentes'] });
       toast.success('Skill creada');
     },
     onError: (error: ApiErrorResponse) => {
@@ -43,15 +50,15 @@ export function useCreateSkill() {
   });
 }
 
-export function useUpdateSkill() {
+export function useUpdateSkill(agenteId: number) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateSkillInput }) => 
-      updateSkill(id, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateSkillInput }) =>
+      updateSkill(agenteId, id, data),
     onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['skill', id] });
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ['skill', agenteId, id] });
+      queryClient.invalidateQueries({ queryKey: ['skills', agenteId] });
       toast.success('Skill actualizada');
     },
     onError: (error: ApiErrorResponse) => {
@@ -61,14 +68,15 @@ export function useUpdateSkill() {
   });
 }
 
-export function useDeleteSkill() {
+export function useDeleteSkill(agenteId: number) {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (id: number) => deleteSkill(id),
+    mutationFn: (id: number) => deleteSkill(agenteId, id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['skills'] });
-      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['skills', agenteId] });
+      queryClient.invalidateQueries({ queryKey: ['agente', agenteId] });
+      queryClient.invalidateQueries({ queryKey: ['agentes'] });
       toast.success('Skill eliminada');
     },
     onError: (error: ApiErrorResponse) => {

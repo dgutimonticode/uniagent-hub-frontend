@@ -8,11 +8,13 @@ import { NotFoundPage } from './pages/NotFoundPage'
 import { ProtectedRoute } from './components/common/ProtectedRoute'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { CommandPalette } from './components/CommandPalette'
+import { GlobalAgentEditor } from './components/agents/GlobalAgentEditor'
 
 function App() {
   return (
     <ErrorBoundary>
       <CommandPalette />
+      <GlobalAgentEditor />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

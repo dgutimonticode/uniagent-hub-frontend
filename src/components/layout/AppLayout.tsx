@@ -1,5 +1,6 @@
 // UniAgent Hub - AppLayout Component
 import { ReactNode } from 'react';
+import { Plus } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { UserMenu } from './UserMenu';
@@ -24,6 +25,7 @@ export function AppLayout({
 }: AppLayoutProps) {
   const { data: agents } = useAgents();
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+  const openAgentEditor = useUIStore((state) => state.openAgentEditor);
   const navigate = useNavigate();
 
   const handleAgentClick = (agentId: number) => {
@@ -35,24 +37,16 @@ export function AppLayout({
   };
 
   const handleNewAgent = () => {
-    navigate('/agent/new');
+    openAgentEditor(null);
   };
 
   const defaultTopbarRight = (
     <>
-      <button className="w-7 h-7 flex items-center justify-center text-[var(--ink-3)] rounded-md transition-colors hover:bg-[var(--bg-hover)]">
-        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-          <path d="M10 21a2 2 0 0 0 4 0"/>
-        </svg>
-      </button>
       <button
         onClick={handleNewAgent}
         className="flex items-center gap-1.5 px-3.5 py-1.5 text-[13px] font-medium bg-[var(--ink)] text-[var(--paper)] rounded-md border border-[var(--ink)] transition-colors hover:bg-[#000]"
       >
-        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
+        <Plus size={14} />
         Nuevo agente
       </button>
       <UserMenu />

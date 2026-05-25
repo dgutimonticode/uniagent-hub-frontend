@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, UserCircle2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuthStore } from '@/stores/authStore';
-import { getMockMateriaName } from '@/lib/mock-asl23';
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ export function ProfilePage() {
             <div>
               <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">Perfil</div>
               <h1 className="mt-2 font-serif text-[34px] font-medium tracking-[-0.02em] text-[var(--ink)]">
-                {user?.name ?? 'Usuario'}
+                {user?.nombre ?? 'Usuario'}
               </h1>
               <p className="mt-1 text-[14px] text-[var(--ink-3)]">Vista de solo lectura</p>
             </div>
@@ -34,7 +33,7 @@ export function ProfilePage() {
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Nombre</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.name ?? '—'}</div>
+              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.nombre ?? '—'}</div>
             </div>
             <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Email</div>
@@ -42,11 +41,13 @@ export function ProfilePage() {
             </div>
             <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Rol</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.role ?? '—'}</div>
+              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{user?.rol ?? '—'}</div>
             </div>
             <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--ink-3)]">Materia</div>
-              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">{getMockMateriaName(1)}</div>
+              <div className="mt-2 font-serif text-[18px] text-[var(--ink)]">
+                {user?.materia?.nombre ?? 'Sin materia asignada'}
+              </div>
             </div>
           </div>
 

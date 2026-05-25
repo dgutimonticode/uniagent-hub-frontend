@@ -7,28 +7,31 @@ import { Agente } from '@/types';
 import { useCreateAgent, useDeleteAgent, useUpdateAgent } from '@/hooks/useAgents';
 import { useMaterias } from '@/hooks/useMaterias';
 
-const agentSchema = z.object({
-  emoji: z.string().min(1, 'Elegí un emoji'),
-  name: z.string().min(2, 'El nombre es obligatorio'),
-  description: z.string().optional(),
-  materia_id: z.string().optional(),
-  color: z.string().regex(/^#([0-9A-Fa-f]{6})$/, 'Color inválido'),
+const createSchema = z.object({
+  icono: z.string().min(1, 'Elegí un emoji'),
+  nombre: z.string().min(2, 'El nombre es obligatorio'),
+  descripcion: z.string().optional(),
+  materia_id: z.string().min(1, 'Elegí una materia'),
 });
 
-// Keep the form shape explicit for TypeScript and review clarity.
+const editSchema = z.object({
+  icono: z.string().min(1, 'Elegí un emoji'),
+  nombre: z.string().min(2, 'El nombre es obligatorio'),
+  descripcion: z.string().optional(),
+  materia_id: z.string().optional(),
+});
+
 interface AgentFormValues {
-  emoji: string;
-  name: string;
-  description?: string;
+  icono: string;
+  nombre: string;
+  descripcion?: string;
   materia_id?: string;
-  color: string;
 }
 
 interface AgentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   agent?: Agente | null;
-  resetKey?: number;
 }
 
 interface DeleteDialogProps {
@@ -37,8 +40,7 @@ interface DeleteDialogProps {
   agent: Agente | null;
 }
 
-const emojiOptions = ['📐', '🧪', '✒️', '🌍', '📜', '⌨️', '🧠', '🔬'];
-const colorOptions = ['#B85C3D', '#2F5A4A', '#3D5A80', '#8B5A3C', '#6E4A24', '#1F1D1A'];
+const iconoOptions = ['📐', '🧪', '✒️', '🌍', '📜', '⌨️', '🧠', '🔬', '⚛️', '☁️'];
 
 function ModalShell({
   open,
@@ -105,9 +107,6 @@ export function AgentEditorDialog({ open, onOpenChange, agent }: AgentDialogProp
   const updateAgent = useUpdateAgent();
   const { data: materias = [] } = useMaterias();
 
-  const initialEmoji = agent?.emoji ?? '📐';
-  const initialColor = agent?.color ?? '#B85C3D';
-
   const isEditing = !!agent;
   const isBusy = createAgent.isPending || updateAgent.isPending;
 
@@ -117,32 +116,34 @@ export function AgentEditorDialog({ open, onOpenChange, agent }: AgentDialogProp
     formState: { errors },
     setValue,
   } = useForm<AgentFormValues>({
-    resolver: zodResolver(agentSchema),
+    resolver: zodResolver(isEditing ? editSchema : createSchema),
     defaultValues: {
-      emoji: agent?.emoji ?? '📐',
-      name: agent?.name ?? '',
-      description: agent?.description ?? '',
-      materia_id: agent?.materia_id ? String(agent.materia_id) : '',
-      color: agent?.color ?? '#B85C3D',
+      icono: agent?.icono ?? '📐',
+      nombre: agent?.nombre ?? '',
+      descripcion: agent?.descripcion ?? '',
+      materia_id: agent?.materia?.id ? String(agent.materia.id) : '',
     },
   });
 
-  const [selectedEmoji, setSelectedEmoji] = useState(initialEmoji);
-  const [selectedColor, setSelectedColor] = useState(initialColor);
+  const [selectedIcono, setSelectedIcono] = useState(agent?.icono ?? '📐');
 
   const onSubmit = async (values: AgentFormValues) => {
-    const payload = {
-      emoji: values.emoji,
-      name: values.name,
-      description: values.description?.trim() || undefined,
-      materia_id: values.materia_id ? Number(values.materia_id) : undefined,
-      color: values.color,
-    };
-
     if (isEditing && agent) {
-      await updateAgent.mutateAsync({ id: agent.id, data: payload });
+      await updateAgent.mutateAsync({
+        id: agent.id,
+        data: {
+          nombre: values.nombre,
+          descripcion: values.descripcion?.trim() || undefined,
+          icono: values.icono,
+        },
+      });
     } else {
-      await createAgent.mutateAsync(payload);
+      await createAgent.mutateAsync({
+        nombre: values.nombre,
+        descripcion: values.descripcion?.trim() || undefined,
+        icono: values.icono,
+        materia_id: Number(values.materia_id),
+      });
     }
 
     onOpenChange(false);
@@ -153,7 +154,7 @@ export function AgentEditorDialog({ open, onOpenChange, agent }: AgentDialogProp
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? 'Editar agente' : 'Nuevo agente'}
-      description={isEditing ? 'Ajustá identidad, materia y color del agente.' : 'Definí cómo se verá tu nuevo agente.'}
+      description={isEditing ? 'Ajustá identidad del agente.' : 'Definí cómo se verá tu nuevo agente.'}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5 px-5 py-5">
         <div className="grid gap-5 md:grid-cols-[1fr_220px]">
@@ -161,17 +162,17 @@ export function AgentEditorDialog({ open, onOpenChange, agent }: AgentDialogProp
             <div className="grid gap-2">
               <label className="text-[13px] font-medium text-[var(--ink-2)]">Nombre</label>
               <input
-                {...register('name')}
+                {...register('nombre')}
                 placeholder="Profesor de Cálculo"
                 className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--accent)]"
               />
-              {errors.name && <p className="text-[12px] text-[var(--bad)]">{errors.name.message}</p>}
+              {errors.nombre && <p className="text-[12px] text-[var(--bad)]">{errors.nombre.message}</p>}
             </div>
 
             <div className="grid gap-2">
               <label className="text-[13px] font-medium text-[var(--ink-2)]">Descripción</label>
               <textarea
-                {...register('description')}
+                {...register('descripcion')}
                 rows={4}
                 placeholder="Mecánica clásica para ingeniería"
                 className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--accent)]"
@@ -180,91 +181,69 @@ export function AgentEditorDialog({ open, onOpenChange, agent }: AgentDialogProp
 
             <div className="grid gap-2">
               <label className="text-[13px] font-medium text-[var(--ink-2)]">Materia</label>
-              <select
-                {...register('materia_id')}
-                className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--accent)]"
-              >
-                <option value="">Sin materia</option>
-                {materias.map((materia) => (
-                  <option key={materia.id} value={materia.id}>
-                    {materia.nombre}
-                  </option>
-                ))}
-              </select>
+              {isEditing ? (
+                <input
+                  value={agent?.materia?.nombre ?? 'Sin materia'}
+                  disabled
+                  className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper-2)] px-3 py-2.5 text-[14px] text-[var(--ink-3)]"
+                />
+              ) : (
+                <select
+                  {...register('materia_id')}
+                  className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--accent)]"
+                >
+                  <option value="">Elegí una materia</option>
+                  {materias.map((materia) => (
+                    <option key={materia.id} value={materia.id}>
+                      {materia.nombre}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {!isEditing && errors.materia_id && (
+                <p className="text-[12px] text-[var(--bad)]">{errors.materia_id.message}</p>
+              )}
+              {isEditing && (
+                <p className="text-[11px] text-[var(--ink-3)]">La materia no se puede cambiar después de crear el agente.</p>
+              )}
             </div>
           </div>
 
           <div className="grid content-start gap-4 rounded-[10px] border border-[var(--hairline)] bg-[var(--paper-2)] p-4">
             <div className="grid gap-2">
-              <label className="text-[13px] font-medium text-[var(--ink-2)]">Emoji</label>
+              <label className="text-[13px] font-medium text-[var(--ink-2)]">Icono</label>
               <div className="flex items-center gap-2 rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5">
-                <span className="text-[20px]">{selectedEmoji}</span>
+                <span className="text-[20px]">{selectedIcono}</span>
                 <input
-                  {...register('emoji')}
+                  {...register('icono', {
+                    onChange: (event) => setSelectedIcono(event.target.value),
+                  })}
                   className="min-w-0 flex-1 bg-transparent text-[14px] outline-none"
                   placeholder="📐"
                 />
               </div>
-              {errors.emoji && <p className="text-[12px] text-[var(--bad)]">{errors.emoji.message}</p>}
+              {errors.icono && <p className="text-[12px] text-[var(--bad)]">{errors.icono.message}</p>}
             </div>
 
             <div className="grid gap-2">
               <label className="text-[13px] font-medium text-[var(--ink-2)]">Atajos</label>
               <div className="flex flex-wrap gap-1.5">
-                {emojiOptions.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => {
-                    setSelectedEmoji(emoji);
-                    setValue('emoji', emoji, { shouldValidate: true });
-                  }}
-                  className={`grid h-8 w-8 place-items-center rounded-[6px] border text-[15px] transition-colors ${
-                    emoji === selectedEmoji
-                      ? 'border-[var(--accent)] bg-[var(--accent-wash)]'
+                {iconoOptions.map((icono) => (
+                  <button
+                    key={icono}
+                    type="button"
+                    onClick={() => {
+                      setSelectedIcono(icono);
+                      setValue('icono', icono, { shouldValidate: true });
+                    }}
+                    className={`grid h-8 w-8 place-items-center rounded-[6px] border text-[15px] transition-colors ${
+                      icono === selectedIcono
+                        ? 'border-[var(--accent)] bg-[var(--accent-wash)]'
                         : 'border-[var(--hairline-2)] bg-[var(--paper)] hover:border-[var(--ink-3)]'
                     }`}
                   >
-                    {emoji}
+                    {icono}
                   </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <label className="text-[13px] font-medium text-[var(--ink-2)]">Color</label>
-              <div className="grid grid-cols-[1fr_auto] gap-2">
-                <input
-                  {...register('color')}
-                  className="w-full rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] px-3 py-2.5 text-[14px] outline-none transition-colors focus:border-[var(--accent)]"
-                  placeholder="#B85C3D"
-                />
-                <input
-                  type="color"
-                  value={selectedColor}
-                  onChange={(event) => {
-                    setSelectedColor(event.target.value);
-                    setValue('color', event.target.value, { shouldValidate: true });
-                  }}
-                  className="h-[44px] w-[52px] cursor-pointer rounded-[8px] border border-[var(--hairline-2)] bg-[var(--paper)] p-1"
-                />
-              </div>
-              {errors.color && <p className="text-[12px] text-[var(--bad)]">{errors.color.message}</p>}
-              <div className="flex flex-wrap gap-1.5">
-                {colorOptions.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setValue('color', color, { shouldValidate: true });
-                    }}
-                    className={`h-7 w-7 rounded-full border transition-transform hover:scale-105 ${
-                      selectedColor === color ? 'border-[var(--ink)] ring-2 ring-[var(--accent-soft)]' : 'border-[var(--hairline-2)]'
-                    }`}
-                    style={{ background: color }}
-                    aria-label={`Seleccionar color ${color}`}
-                  />
                 ))}
               </div>
             </div>
@@ -311,7 +290,7 @@ export function AgentDeleteDialog({ open, onOpenChange, agent }: DeleteDialogPro
     >
       <div className="grid gap-4 px-5 py-5">
         <div className="rounded-[10px] border border-[var(--bad-wash)] bg-[var(--bad-wash)] p-4 text-[13.5px] leading-6 text-[var(--bad)]">
-          Estás por eliminar <strong className="font-medium">{agent?.name ?? 'este agente'}</strong>. No se puede deshacer.
+          Estás por eliminar <strong className="font-medium">{agent?.nombre ?? 'este agente'}</strong>. No se puede deshacer.
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t border-[var(--hairline)] pt-4">
