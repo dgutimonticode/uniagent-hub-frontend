@@ -5,3 +5,11 @@ dist/
 !.env.example
 .DS_Store
 *.local
+
+# Local AI/workflow artifacts
+.atl/
+.windsurf/
+.gga
+
+# Design mockups and working sketches kept local
+uniagent-hub-front/

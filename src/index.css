@@ -1,0 +1,152 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* UniAgent Hub Design Tokens */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* paper palette - from uniagent-tokens.css */
+  --paper: #FAF8F3;
+  --paper-2: #F4F1E8;
+  --paper-3: #ECE8DC;
+  --ink: #1F1D1A;
+  --ink-2: #4A4742;
+  --ink-3: #8A857B;
+  --ink-4: #B5AFA1;
+  --hairline: #E5E0D2;
+  --hairline-2: #D9D3C2;
+  --bg-hover: rgba(31, 29, 26, 0.045);
+  --bg-active: rgba(31, 29, 26, 0.075);
+
+  /* accent: muted terracotta */
+  --accent: #B85C3D;
+  --accent-soft: #E8C9BC;
+  --accent-wash: #F4E4DA;
+  --accent-ink: #6E3A24;
+
+  /* status colors */
+  --ok: #5E7A53;
+  --ok-wash: #E4EBDE;
+  --warn: #B58A2E;
+  --warn-wash: #F0E5C8;
+  --bad: #A24A3C;
+  --bad-wash: #F1DAD2;
+  --info: #3D5A80;
+  --info-wash: #DCE3EA;
+
+  /* fonts */
+  --serif: "Newsreader", ui-serif, Georgia, serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* layout */
+  --sidebar-w: 256px;
+  --topbar-h: 52px;
+  --radius: 6px;
+  --t: 150ms cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* shadcn/ui compatibility */
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-2);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-2);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--accent);
+  --accent-foreground: var(--paper);
+  --destructive: var(--bad);
+  --destructive-foreground: var(--paper);
+  --border: var(--hairline);
+  --input: var(--hairline-2);
+  --ring: var(--accent);
+}
+
+@layer base {
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--serif);
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+  }
+
+  h1 em, h2 em, h3 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+}
+
+@layer utilities {
+  .font-serif {
+    font-family: var(--serif);
+  }
+  
+  .font-mono {
+    font-family: var(--mono);
+  }
+
+  .notion-editor {
+    min-height: 280px;
+    color: var(--ink);
+  }
+
+  .notion-editor p,
+  .notion-editor li {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .notion-editor h1,
+  .notion-editor h2,
+  .notion-editor h3,
+  .notion-editor h4 {
+    font-family: var(--serif);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    margin-top: 1.15em;
+    margin-bottom: 0.45em;
+  }
+
+  .notion-editor h1 {
+    font-size: 2.1rem;
+  }
+
+  .notion-editor h2 {
+    font-size: 1.65rem;
+  }
+
+  .notion-editor blockquote {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .notion-editor pre {
+    font-family: var(--mono);
+  }
+}
