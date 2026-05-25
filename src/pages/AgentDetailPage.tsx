@@ -67,30 +67,28 @@ export function AgentDetailPage() {
 
   return (
     <AppLayout crumbs={breadcrumbs} activeAgentId={agentId}>
-      <div className="px-10 py-8 lg:px-12">
-        <header className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-5">
-            <div className="grid h-20 w-20 flex-shrink-0 place-items-center rounded-[16px] border border-[var(--hairline)] bg-[var(--paper-2)] text-[40px] shadow-[0_1px_2px_rgba(31,29,26,0.03)]">
+      <div className="uh-cover px-10 pb-10 pt-12 lg:px-12">
+        <header className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-start gap-6">
+            <div className="grid h-[88px] w-[88px] flex-shrink-0 place-items-center rounded-[18px] border border-[var(--hairline)] bg-[var(--paper)] text-[44px] shadow-[0_10px_28px_-12px_rgba(31,29,26,0.18)]">
               {agent.icono}
             </div>
             <div className="min-w-0">
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
-                Agente · {agent.docente.nombre}
-              </div>
-              <h1 className="mt-2 font-serif text-[40px] font-medium leading-tight tracking-[-0.02em] text-[var(--ink)]">
-                {agent.nombre}
+              <span className="uh-eyebrow">Agente · {agent.docente.nombre}</span>
+              <h1 className="mt-2 font-serif text-[44px] font-medium leading-[1.04] tracking-[-0.022em] text-[var(--ink)]">
+                <NameWithAccent name={agent.nombre} />
               </h1>
               {agent.descripcion && (
-                <p className="mt-2 max-w-2xl font-serif text-[16px] italic leading-7 text-[var(--ink-2)]">
+                <p className="mt-3 max-w-2xl font-serif text-[17px] italic leading-[1.6] text-[var(--ink-2)]">
                   {agent.descripcion}
                 </p>
               )}
-              <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-[var(--ink-3)]">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="uh-pill terra">
                   <BookOpen size={12} /> {agent.materia.nombre}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">
-                  {skills.length} skills
+                <span className="uh-pill">
+                  {skills.length} {skills.length === 1 ? 'skill' : 'skills'}
                 </span>
               </div>
             </div>
@@ -107,7 +105,9 @@ export function AgentDetailPage() {
             </button>
           )}
         </header>
+      </div>
 
+      <div className="px-10 py-8 lg:px-12">
         <section>
           <div className="mb-4 flex items-end justify-between gap-4">
             <h2 className="font-serif text-[22px] font-medium tracking-[-0.015em] text-[var(--ink)]">
@@ -160,6 +160,21 @@ export function AgentDetailPage() {
         </section>
       </div>
     </AppLayout>
+  );
+}
+
+function NameWithAccent({ name }: { name: string }) {
+  const parts = name.trim().split(' ');
+  if (parts.length <= 1) {
+    return <em className="italic text-[var(--accent)]">{name}</em>;
+  }
+  const head = parts.slice(0, -1).join(' ');
+  const tail = parts[parts.length - 1];
+  return (
+    <>
+      {head}{' '}
+      <em className="italic text-[var(--accent)]">{tail}</em>
+    </>
   );
 }
 
