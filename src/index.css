@@ -150,3 +150,107 @@
     font-family: var(--mono);
   }
 }
+
+@layer components {
+  .uh-eyebrow {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .uh-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--paper-2);
+    border: 1px solid var(--hairline);
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .uh-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.75;
+  }
+  .uh-pill.moss  { background: var(--ok-wash);     border-color: rgba(94,122,83,0.3);   color: #4d6443; }
+  .uh-pill.terra { background: var(--accent-wash); border-color: var(--accent-soft);    color: var(--accent); }
+  .uh-pill.warn  { background: var(--warn-wash);   border-color: rgba(181,138,46,0.3);  color: #8a6a25; }
+  .uh-pill.bad   { background: var(--bad-wash);    border-color: rgba(162,74,60,0.3);   color: var(--bad); }
+  .uh-pill.info  { background: var(--info-wash);   border-color: rgba(61,90,128,0.3);   color: var(--info); }
+  .uh-pill.tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 1px 7px;
+    border-radius: 3px;
+  }
+
+  .uh-card {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 10px;
+    padding: 16px;
+    transition: border-color var(--t), box-shadow var(--t);
+  }
+  .uh-card:hover { border-color: var(--hairline-2); }
+  .uh-card.sunk  { background: var(--paper-2); }
+
+  .uh-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(140deg, var(--accent) 0%, #C97A56 100%);
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 13px;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  }
+  .uh-avatar.lg { width: 40px; height: 40px; font-size: 17px; }
+  .uh-avatar.xl { width: 64px; height: 64px; font-size: 26px; }
+  .uh-avatar.ink {
+    background: linear-gradient(140deg, var(--ink) 0%, #3a3530 100%);
+  }
+
+  .uh-progress {
+    width: 100%;
+    height: 4px;
+    background: var(--paper-3);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .uh-progress > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: inherit;
+    transition: width var(--t);
+  }
+  .uh-progress.moss > span { background: var(--ok); }
+  .uh-progress.warn > span { background: var(--warn); }
+
+  /* Editorial cover band used by agent and skill headers. */
+  .uh-cover {
+    background:
+      radial-gradient(circle at 12% 18%, var(--accent-wash) 0%, transparent 38%),
+      radial-gradient(circle at 88% 82%, var(--paper-3) 0%, transparent 45%),
+      linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 100%);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .uh-divider-dotted {
+    border: 0;
+    border-top: 1px dashed var(--hairline-2);
+  }
+}
