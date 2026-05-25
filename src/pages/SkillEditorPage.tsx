@@ -115,21 +115,30 @@ function SkillEditorBody({
       <div className="px-10 py-8 lg:px-12">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="max-w-2xl flex-1">
-            <input
-              value={nombre}
-              onChange={(event) => setNombre(event.target.value)}
-              readOnly={readOnly}
-              className="w-full bg-transparent font-serif text-[38px] font-medium leading-none tracking-[-0.02em] text-[var(--ink)] outline-none placeholder:text-[var(--ink-4)]"
-              placeholder="Título de la skill"
-            />
+            {readOnly ? (
+              <h1 className="font-serif text-[38px] font-medium leading-tight tracking-[-0.02em] text-[var(--ink)]">
+                {nombre || 'Skill'}
+              </h1>
+            ) : (
+              <input
+                value={nombre}
+                onChange={(event) => setNombre(event.target.value)}
+                className="w-full bg-transparent font-serif text-[38px] font-medium leading-none tracking-[-0.02em] text-[var(--ink)] outline-none placeholder:text-[var(--ink-4)]"
+                placeholder="Título de la skill"
+              />
+            )}
             <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-[var(--ink-3)]">
               {readOnly ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">Modo lectura</span>
+                updatedAt && (
+                  <span>Actualizado el {new Date(updatedAt).toLocaleString([], { dateStyle: 'long', timeStyle: 'short' })}</span>
+                )
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">{saveLabel}</span>
-              )}
-              {updatedAt && !readOnly && (
-                <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                <>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[var(--hairline)] bg-[var(--paper-2)] px-2.5 py-1">{saveLabel}</span>
+                  {updatedAt && (
+                    <span>Última edición: {new Date(updatedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+                  )}
+                </>
               )}
             </div>
           </div>

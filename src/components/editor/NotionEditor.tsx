@@ -67,6 +67,14 @@ export function NotionEditor({ content, onChange, readOnly = false }: NotionEdit
     );
   }
 
+  if (readOnly) {
+    return (
+      <article className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] px-8 py-8 shadow-[0_1px_2px_rgba(31,29,26,0.03)] lg:px-12 lg:py-10">
+        <EditorContent editor={editor} />
+      </article>
+    );
+  }
+
   return (
     <div className="rounded-[12px] border border-[var(--hairline)] bg-[var(--paper)] shadow-[0_1px_2px_rgba(31,29,26,0.03)]">
       <div className="border-b border-[var(--hairline)] bg-[var(--paper-2)] p-3">
