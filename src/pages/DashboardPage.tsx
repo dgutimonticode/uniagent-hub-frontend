@@ -107,6 +107,18 @@ export function DashboardPage() {
     return 'Buenas noches';
   }, []);
 
+  const todayLabel = useMemo(() => {
+    const now = new Date();
+    const weekday = now.toLocaleDateString('es-AR', { weekday: 'long' });
+    const day = now.getDate();
+    const month = now.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '');
+    const start = new Date(now.getFullYear(), 0, 1);
+    const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
+    const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    return `${cap(weekday)} ${day} ${month} · semana ${week}`;
+  }, []);
+
   const userName = user?.nombre?.split(' ')[0] ?? '';
 
   const handleNewSkill = () => {
@@ -122,13 +134,16 @@ export function DashboardPage() {
       <div className="px-10 py-8 lg:px-12">
         <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--ink-3)]">
-              {isDocente ? 'Tu espacio de trabajo' : 'Tu espacio de estudio'}
-            </div>
-            <h1 className="mt-2 font-serif text-[48px] font-normal leading-none tracking-[-0.022em] text-[var(--ink)]">
-              {greeting},<br />
-              <em>{userName || 'bienvenido'}.</em>
+            <span className="uh-eyebrow">{todayLabel}</span>
+            <h1 className="mt-2 font-serif text-[48px] font-normal leading-[1.04] tracking-[-0.022em] text-[var(--ink)]">
+              {greeting},{' '}
+              <em className="italic text-[var(--accent)]">
+                {userName || 'bienvenido'}.
+              </em>
             </h1>
+            <p className="mt-1 text-[13px] text-[var(--ink-3)]">
+              {isDocente ? 'Tu espacio de trabajo' : 'Tu espacio de estudio'}
+            </p>
           </div>
 
           {isDocente && (
