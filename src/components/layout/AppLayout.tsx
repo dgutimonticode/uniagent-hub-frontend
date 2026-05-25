@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { UserMenu } from './UserMenu';
 import { useUIStore } from '@/stores/uiStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useAgents } from '@/hooks/useAgents';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ export function AppLayout({
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   const openAgentEditor = useUIStore((state) => state.openAgentEditor);
   const navigate = useNavigate();
+  const isDocente = useAuthStore((state) => state.user?.rol === 'docente');
 
   const handleAgentClick = (agentId: number) => {
     navigate(`/agent/${agentId}`);
@@ -42,13 +44,15 @@ export function AppLayout({
 
   const defaultTopbarRight = (
     <>
-      <button
-        onClick={handleNewAgent}
-        className="flex items-center gap-1.5 px-3.5 py-1.5 text-[13px] font-medium bg-[var(--ink)] text-[var(--paper)] rounded-md border border-[var(--ink)] transition-colors hover:bg-[#000]"
-      >
-        <Plus size={14} />
-        Nuevo agente
-      </button>
+      {isDocente && (
+        <button
+          onClick={handleNewAgent}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 text-[13px] font-medium bg-[var(--ink)] text-[var(--paper)] rounded-md border border-[var(--ink)] transition-colors hover:bg-[#000]"
+        >
+          <Plus size={14} />
+          Nuevo agente
+        </button>
+      )}
       <UserMenu />
     </>
   );

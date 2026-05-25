@@ -28,6 +28,7 @@ interface AgentRowProps {
   onDelete: () => void;
   menuOpen: boolean;
   onToggleMenu: () => void;
+  showActions: boolean;
 }
 
 function AgentRow({
@@ -41,6 +42,7 @@ function AgentRow({
   onDelete,
   menuOpen,
   onToggleMenu,
+  showActions,
 }: AgentRowProps) {
   // Skills are fetched lazily — backend agent detail does NOT include skills inline.
   const { data: skills = [] } = useSkills(isExpanded ? agent.id : 0);
@@ -98,35 +100,37 @@ function AgentRow({
         </div>
       )}
 
-      <div className="relative">
-        <button
-          type="button"
-          onClick={onToggleMenu}
-          className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded-md text-[var(--ink-3)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--ink)]"
-          aria-label={`Acciones de ${agent.nombre}`}
-        >
-          <MoreHorizontal size={14} />
-        </button>
+      {showActions && (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={onToggleMenu}
+            className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded-md text-[var(--ink-3)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--ink)]"
+            aria-label={`Acciones de ${agent.nombre}`}
+          >
+            <MoreHorizontal size={14} />
+          </button>
 
-        {menuOpen && (
-          <div className="absolute right-1 top-8 z-20 w-44 rounded-md border border-[var(--hairline)] bg-[var(--paper)] p-1 shadow-[0_12px_30px_rgba(31,29,26,0.12)]">
-            <button
-              type="button"
-              onClick={onEdit}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-[var(--ink)] transition-colors hover:bg-[var(--bg-hover)]"
-            >
-              <Pencil size={14} /> Editar
-            </button>
-            <button
-              type="button"
-              onClick={onDelete}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-[var(--bad)] transition-colors hover:bg-[var(--bad-wash)]"
-            >
-              <Trash2 size={14} /> Eliminar
-            </button>
-          </div>
-        )}
-      </div>
+          {menuOpen && (
+            <div className="absolute right-1 top-8 z-20 w-44 rounded-md border border-[var(--hairline)] bg-[var(--paper)] p-1 shadow-[0_12px_30px_rgba(31,29,26,0.12)]">
+              <button
+                type="button"
+                onClick={onEdit}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-[var(--ink)] transition-colors hover:bg-[var(--bg-hover)]"
+              >
+                <Pencil size={14} /> Editar
+              </button>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-[13px] text-[var(--bad)] transition-colors hover:bg-[var(--bad-wash)]"
+              >
+                <Trash2 size={14} /> Eliminar
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -144,6 +148,7 @@ export function Sidebar({
   const openAgentEditor = useUIStore((state) => state.openAgentEditor);
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const isDocente = user?.rol === 'docente';
   const [expandedAgents, setExpandedAgents] = useState<Set<number>>(new Set());
   const [menuOpenAgentId, setMenuOpenAgentId] = useState<number | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -257,18 +262,21 @@ export function Sidebar({
               onToggleMenu={() =>
                 setMenuOpenAgentId((current) => (current === agent.id ? null : agent.id))
               }
+              showActions={isDocente}
             />
           );
         })}
       </div>
 
-      <button
-        onClick={handleNewAgent}
-        className="flex items-center gap-2 px-3 py-1.5 mx-2 my-1 text-[var(--ink-3)] text-[13px] rounded-md border border-dashed border-[var(--hairline-2)] w-[calc(100%-16px)] transition-all hover:text-[var(--accent)] hover:border-[var(--accent-soft)] hover:bg-[var(--accent-wash)]"
-      >
-        <Plus size={12} />
-        <span>Nuevo agente</span>
-      </button>
+      {isDocente && (
+        <button
+          onClick={handleNewAgent}
+          className="flex items-center gap-2 px-3 py-1.5 mx-2 my-1 text-[var(--ink-3)] text-[13px] rounded-md border border-dashed border-[var(--hairline-2)] w-[calc(100%-16px)] transition-all hover:text-[var(--accent)] hover:border-[var(--accent-soft)] hover:bg-[var(--accent-wash)]"
+        >
+          <Plus size={12} />
+          <span>Nuevo agente</span>
+        </button>
+      )}
 
       <AgentDeleteDialog
         key={`delete-${deleteOpen ? (agentToDelete?.id ?? 'none') : 'closed'}`}
