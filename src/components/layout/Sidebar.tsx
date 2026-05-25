@@ -286,7 +286,7 @@ export function Sidebar({
       />
 
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-t border-[var(--hairline)]">
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--accent)] to-[#C97A56] text-[var(--paper)] flex items-center justify-center font-serif font-medium text-[13px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)] flex-shrink-0">
+        <div className={`uh-avatar ${user?.rol === 'estudiante' ? 'ink' : ''}`}>
           {userInitials}
         </div>
         <div className="flex flex-col line-height-1.2 min-w-0 flex-1">

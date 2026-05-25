@@ -41,7 +41,7 @@ export function Topbar({ crumbs, right, onToggleSidebar }: TopbarProps) {
               {crumb.label}
             </span>
             {i < crumbs.length - 1 && (
-              <span className="text-[11px] text-[var(--ink-4)] mx-1">/</span>
+              <span className="font-mono text-[11px] text-[var(--ink-3)] mx-1.5">/</span>
             )}
           </div>
         ))}
