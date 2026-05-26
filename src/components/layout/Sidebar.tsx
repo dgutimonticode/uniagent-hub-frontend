@@ -48,7 +48,7 @@ function AgentRow({
   const { data: skills = [] } = useSkills(isExpanded ? agent.id : 0);
 
   return (
-    <div>
+    <div className="relative">
       <button
         onClick={onToggle}
         className={`flex items-center gap-1 px-1.5 py-1 rounded-md cursor-pointer transition-colors min-h-[28px] w-full text-left ${
@@ -101,11 +101,11 @@ function AgentRow({
       )}
 
       {showActions && (
-        <div className="relative">
+        <>
           <button
             type="button"
             onClick={onToggleMenu}
-            className="absolute right-1 top-1.5 flex h-6 w-6 items-center justify-center rounded-md text-[var(--ink-3)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--ink)]"
+            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-md text-[var(--ink-3)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--ink)]"
             aria-label={`Acciones de ${agent.nombre}`}
           >
             <MoreHorizontal size={14} />
@@ -129,7 +129,7 @@ function AgentRow({
               </button>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
@@ -169,7 +169,7 @@ export function Sidebar({
   const totalSkills = agents.reduce((total, agent) => total + (agent.skills_count ?? 0), 0);
   const userInitials = user?.nombre
     ?.split(' ')
-    .map((n) => n[0])
+    .map((word) => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || '??';
@@ -234,7 +234,9 @@ export function Sidebar({
 
       <div className="flex-1 overflow-auto min-h-0 px-1">
         {agents.map((agent) => {
+          // Active agent is always forced-expanded so its skills are visible.
           const isExpanded = expandedAgents.has(agent.id) || agent.id === activeAgentId;
+          // Row is "active" only when the agent itself is selected, not one of its skills.
           const isActiveAgent = agent.id === activeAgentId && !activeSkillId;
           return (
             <AgentRow
@@ -278,6 +280,7 @@ export function Sidebar({
         </button>
       )}
 
+      {/* Dynamic key forces remount on each open so dialog internal state resets. */}
       <AgentDeleteDialog
         key={`delete-${deleteOpen ? (agentToDelete?.id ?? 'none') : 'closed'}`}
         open={deleteOpen}

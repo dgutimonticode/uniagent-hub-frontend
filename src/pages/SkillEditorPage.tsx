@@ -40,14 +40,14 @@ function SkillEditorBody({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const saveSkill = useSkillSave();
+  const { mutateAsync: saveSkillAsync } = useSkillSave();
   const deleteSkill = useDeleteSkill(agentId);
   const { data: agent } = useAgent(agentId);
 
   const persistSkill = useCallback(
     async (draft: SkillDraft) => {
       try {
-        const saved = await saveSkill.mutateAsync({
+        const saved = await saveSkillAsync({
           agenteId: agentId,
           skillId,
           nombre: draft.nombre,
@@ -61,13 +61,14 @@ function SkillEditorBody({
         throw saveError;
       }
     },
-    [agentId, saveSkill, skillId]
+    [agentId, saveSkillAsync, skillId]
   );
 
+  const AUTOSAVE_DEBOUNCE_MS = 1500;
   const { status, error: autoSaveError, retry } = useAutoSave<SkillDraft>(
     { nombre, contenido },
     persistSkill,
-    1500,
+    AUTOSAVE_DEBOUNCE_MS,
     !readOnly
   );
 
